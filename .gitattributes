@@ -1,0 +1,6 @@
+# This fork commits its build output, so line-ending conversion is not a
+# cosmetic question here: a checkout on Windows must reproduce the exact bytes
+# that were built and verified, or the shipped package differs from the one
+# that passed its checks.
+*.wasm binary
+pkg/** -text

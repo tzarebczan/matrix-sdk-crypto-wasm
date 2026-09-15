@@ -92,3 +92,19 @@ git = "https://github.com/matrix-org/matrix-rust-sdk"
 # Workaround for https://github.com/rustwasm/wasm-bindgen/issues/4283, while we work up the courage to upgrade
 # wasm-bindgen
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test_coverage)'] }
+
+# eggomi fork of matrix-org/matrix-sdk-crypto-wasm (Apache-2.0).
+#
+# Builds matrix-sdk-crypto from our matrix-rust-sdk fork, which carries one
+# change: `get_or_update_sender_data` no longer reruns `SenderDataFinder` for
+# every decrypted event on a session whose trust cannot be raised.
+#
+# Pinned by REVISION, not branch: a branch would make the build depend on
+# whatever that branch points at today, and this artifact is shipped prebuilt.
+# All four crates are patched together — they are one workspace at one rev, and
+# patching a subset duplicates types.
+[patch."https://github.com/matrix-org/matrix-rust-sdk"]
+matrix-sdk-crypto = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "a62fbc7c17e2ba184698fbd092d993f4973c6d22" }
+matrix-sdk-common = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "a62fbc7c17e2ba184698fbd092d993f4973c6d22" }
+matrix-sdk-indexeddb = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "a62fbc7c17e2ba184698fbd092d993f4973c6d22" }
+matrix-sdk-qrcode = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "a62fbc7c17e2ba184698fbd092d993f4973c6d22" }

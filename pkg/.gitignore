@@ -1,0 +1,15 @@
+# Upstream ignores this whole directory: it is wasm-pack output, and upstream
+# publishes to npm from a CI build. wasm-pack rewrites this file to "*" on
+# every build, so re-apply it afterwards (scripts/build.sh does not).
+#
+# This fork is consumed straight from git, so the build output IS the delivery
+# and has to be committed. Allow exactly the files package.json lists in
+# "files" — nothing else from a local build (the loader we delete, wasm-opt
+# temporaries) should ever reach a consumer.
+*
+!.gitignore
+!matrix_sdk_crypto_wasm.d.ts
+!matrix_sdk_crypto_wasm_bg.js
+!matrix_sdk_crypto_wasm_bg.cjs
+!matrix_sdk_crypto_wasm_bg.wasm.d.ts
+!matrix_sdk_crypto_wasm_bg.wasm
