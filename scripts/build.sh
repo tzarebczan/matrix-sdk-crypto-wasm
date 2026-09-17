@@ -41,4 +41,17 @@ wasm-pack build --no-pack --target bundler --scope matrix-org --out-dir pkg --we
 rm pkg/matrix_sdk_crypto_wasm.js
 
 # The JS <-> WASM glue uses ESM syntax, so we want to create a CommonJS version of it
-babel pkg/matrix_sdk_crypto_wasm_bg.js --out-dir pkg --out-file-extension .cjs --plugins @babel/plugin-transform-modules-commonjs
+#
+# eggomi fork: resolve babel out of node_modules rather than trusting PATH.
+# A bare `babel` is not on PATH under pnpm, so this step exited 127 *after*
+# wasm-pack had already written a new .wasm and .js — leaving a .cjs from the
+# previous build beside them. That mismatch is invisible in git status (both
+# files are tracked and both look modified) and ships as a working import for
+# ESM consumers and stale glue for CJS ones.
+"$(dirname "$0")/../node_modules/.bin/babel" pkg/matrix_sdk_crypto_wasm_bg.js \
+  --out-dir pkg --out-file-extension .cjs \
+  --plugins @babel/plugin-transform-modules-commonjs
+
+# eggomi fork: wasm-pack rewrites pkg/.gitignore to "*" on every build, which
+# would untrack the artifact this fork exists to deliver. Restore the allowlist.
+git -C "$(dirname "$0")/.." checkout -- pkg/.gitignore

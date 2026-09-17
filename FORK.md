@@ -8,9 +8,11 @@ Base: upstream tag **v18.8.0**.
 
 ## What is changed, and why
 
-One behavioural change, in `matrix-sdk-crypto` rather than in this repo — see
-the companion fork [tzarebczan/matrix-rust-sdk](https://github.com/tzarebczan/matrix-rust-sdk),
+Two behavioural changes, both in `matrix-sdk-crypto` rather than in this repo —
+see the companion fork [tzarebczan/matrix-rust-sdk](https://github.com/tzarebczan/matrix-rust-sdk),
 branch `eggomi/sender-data-recalc-cache`.
+
+### 1. Sender data is not recalculated per decrypted event
 
 `OlmMachine::get_or_update_sender_data` recalculates a session's `SenderData`
 whenever `should_recalculate()` is true, and only persists the result when it
@@ -28,6 +30,33 @@ The fix is not a TTL. `SenderDataFinder` reads exactly two things that can
 change (stored device data, stored identities); both now move a generation
 counter on `CryptoStoreWrapper`, so a `(session, claimed sender)` pair already
 tried at the current generation provably cannot produce a different answer.
+
+Upstream was checked first: no equivalent fix exists on `main`.
+
+### 2. The Olm account is not re-pickled on read-only transactions
+
+`StoreTransaction::account()` takes the account out of the store cache, so a
+caller that only reads it leaves `PendingChanges::account` populated and is
+indistinguishable from one that wrote. `commit` then pays twice: `deep_clone`,
+which is `from_pickle(pickle())`, and the store write. Unpickling is the
+expensive half — vodozemac rebuilds `key_ids_by_key` by deriving the public half
+of every stored one-time key, one Curve25519 base multiplication each
+(`src/olm/account/one_time_keys.rs`, `impl From<OneTimeKeysPickle>`).
+
+`PendingChanges` carries nothing but the account, so when it is unchanged the
+whole commit is a no-op. Measured on eggomi's web client: **1.09 s** across 61
+commits in one 45-second boot trace, ~11 ms apiece, 19% of all main-thread time,
+plus 61 redundant IndexedDB writes. The common trigger is benign — every /sync
+calls `update_key_counts`, and a server reporting an unchanged one-time key count
+leaves the account byte-for-byte identical.
+
+The fix fingerprints the account when the transaction takes it and compares at
+commit. It compares the whole pickle rather than tracking a dirty flag on each
+mutating method, so a mutation nobody remembered to flag still changes the bytes
+and the worst a miss can do is write when it need not have. That matters most
+for a change with no other outward sign: receiving an Olm pre-key message
+consumes an already-published one-time key, moving neither the uploaded count
+nor the unpublished-key map.
 
 Upstream was checked first: no equivalent fix exists on `main`.
 
@@ -60,7 +89,9 @@ Then verify the artifact rather than trusting the build log:
   upstream's published sizes exactly — only the `.wasm` should differ.
 - The string `device_generation` must appear in `pkg/matrix_sdk_crypto_wasm_bg.wasm`
   (it is `#[inline(never)]` in the fork precisely so the symbol survives into
-  the name section) and must be absent from upstream's build.
+  the name section) and must be absent from upstream's build. It is the marker
+  for change 1; change 2 carries no such symbol of its own — both land together
+  because `[patch]` pins one revision, which is what that check establishes.
 - `npx jest` runs upstream's own suite against the built artifact.
 
 ## Upgrading
