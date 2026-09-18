@@ -35,9 +35,19 @@ dwarf-debug-info = true
 [package.metadata.wasm-pack.profile.release]
 # Tell wasm-opt to:
 #  * `-Oz`: optimise for size
-#  * `-g`: include the "name" section (which holds the printable names for
-#    symbols) in the output.
-wasm-opt = ['-Oz', '-g']
+#
+# eggomi fork: upstream also passes `-g`, which keeps the "name" section (the
+# printable names for symbols). That section is 2.87 MB of this artifact —
+# 38% of the file, and larger than everything except the code itself — and
+# nothing at runtime reads it. It exists so that stack traces and CPU profiles
+# show `curve25519_dalek::...::mul_base` instead of `wasm-function[2772]`.
+#
+# We serve this to every signed-in browser, so it is paid for on every cold
+# load: 7.48 MB -> 4.61 MB uncompressed, and 1413 KiB -> 1262 KiB over the
+# wire at brotli q11. Dropping it costs symbolised production profiles; a
+# local `pnpm build:fork` with `-g` restored gets them back for the session
+# that needs them, which is the right place to spend the bytes.
+wasm-opt = ['-Oz']
 
 ################################################################################
 

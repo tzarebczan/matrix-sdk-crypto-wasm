@@ -71,6 +71,28 @@ Upstream was checked first: no equivalent fix exists on `main`.
   from git, and that one compiles Rust — it would break `pnpm install` on any
   machine without the toolchain. Use `pnpm build:fork` to rebuild deliberately.
 
+### The release build drops the WASM `name` section
+
+`Cargo.toml` passes `wasm-opt = ['-Oz']` where upstream passes `['-Oz', '-g']`.
+The `-g` keeps the "name" custom section — the printable symbol names — which
+measured **2.87 MB, 38% of the artifact**, larger than everything except the
+code itself. Nothing at runtime reads it; it exists so stack traces and CPU
+profiles show `curve25519_dalek::…::mul_base` rather than `wasm-function[2772]`.
+
+eggomi serves this to every signed-in browser, so it is paid for on every cold
+load: **7,844,301 → 4,835,016 bytes** uncompressed, and 1413 → 1262 KiB over
+the wire at brotli q11.
+
+Verified equivalent, not just smaller: all **700 exports are identical**, the
+code and data sections are unchanged in size, and `matrix_sdk_crypto_wasm_bg.js`
+/ `.cjs` / both `.d.ts` are byte-identical — only the `.wasm` differs. Upstream's
+jest suite is unchanged against it (150 pass; `tests/asyncload.test.js` fails on
+the old artifact too — it assigns an undeclared `initUserId` under strict mode).
+
+The cost is unsymbolised production profiles. A local `pnpm build:fork` with
+`-g` restored gets them back for the session that needs them, which is a better
+place to spend 2.87 MB than every user's first load.
+
 ## Rebuilding
 
 Needs the Rust toolchain, the `wasm32-unknown-unknown` target, and `wasm-pack`.
@@ -87,11 +109,19 @@ Then verify the artifact rather than trusting the build log:
 
 - `pkg/matrix_sdk_crypto_wasm_bg.js`, `.cjs` and both `.d.ts` should match
   upstream's published sizes exactly — only the `.wasm` should differ.
-- The string `device_generation` must appear in `pkg/matrix_sdk_crypto_wasm_bg.wasm`
-  (it is `#[inline(never)]` in the fork precisely so the symbol survives into
-  the name section) and must be absent from upstream's build. It is the marker
-  for change 1; change 2 carries no such symbol of its own — both land together
-  because `[patch]` pins one revision, which is what that check establishes.
+- The `device_generation` marker needs a `-g` build now. It is `#[inline(never)]`
+  in the fork precisely so the symbol survives into the name section, but the
+  release build drops that section (see "The release build drops the WASM
+  `name` section" above), so a release artifact no longer contains the
+  string. To check it, build once with `-g` restored in
+  `[package.metadata.wasm-pack.profile.release]`, confirm `device_generation`
+  appears (and is absent from upstream's build), then rebuild without it and
+  ship that. It is the marker for change 1; change 2 carries no such symbol of
+  its own — both land together because `[patch]` pins one revision, which is
+  what that check establishes.
+- Cheaper standing check, for a rebuild that is not re-verifying the patch:
+  `Cargo.lock` must pin `matrix-rust-sdk` at the expected fork revision, and
+  the `.wasm` must have NO `name` custom section.
 - `npx jest` runs upstream's own suite against the built artifact.
 
 ## Upgrading
