@@ -2687,6 +2687,11 @@ export class OlmMachine {
      */
     receiveVerificationEvent(event: string, room_id: RoomId): Promise<void>;
     /**
+     * Fork: our own devices refused secrets (see
+     * `setRefusedSecretDevices`).
+     */
+    refusedSecretDevices(): Promise<string[]>;
+    /**
      * Register a callback which will be called whenever there is an update to
      * a device.
      *
@@ -2780,6 +2785,15 @@ export class OlmMachine {
      * Record that we have downloaded all message keys for the given room.
      */
     setHasDownloadedAllRoomKeys(room_id: RoomId): Promise<void>;
+    /**
+     * Fork: set our own devices that never get a secret or a forwarded room
+     * key from this device, and whose secrets and forwarded keys this device
+     * never takes, verified or not (a keeper's device). Replaces the whole
+     * set; kept in the store across restarts.
+     *
+     * * `device_ids` - the device IDs, as strings
+     */
+    setRefusedSecretDevices(device_ids: string[]): Promise<void>;
     /**
      * Store encryption settings for the given room.
      *

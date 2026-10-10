@@ -5456,6 +5456,15 @@ export class OlmMachine {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Fork: our own devices refused secrets (see
+     * `setRefusedSecretDevices`).
+     * @returns {Promise<string[]>}
+     */
+    refusedSecretDevices() {
+        const ret = wasm.olmmachine_refusedSecretDevices(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * Register a callback which will be called whenever there is an update to
      * a device.
      *
@@ -5609,6 +5618,22 @@ export class OlmMachine {
     setHasDownloadedAllRoomKeys(room_id) {
         _assertClass(room_id, RoomId);
         const ret = wasm.olmmachine_setHasDownloadedAllRoomKeys(this.__wbg_ptr, room_id.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Fork: set our own devices that never get a secret or a forwarded room
+     * key from this device, and whose secrets and forwarded keys this device
+     * never takes, verified or not (a keeper's device). Replaces the whole
+     * set; kept in the store across restarts.
+     *
+     * * `device_ids` - the device IDs, as strings
+     * @param {string[]} device_ids
+     * @returns {Promise<void>}
+     */
+    setRefusedSecretDevices(device_ids) {
+        const ptr0 = passArrayJsValueToWasm0(device_ids, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.olmmachine_setRefusedSecretDevices(this.__wbg_ptr, ptr0, len0);
         return ret;
     }
     /**
@@ -11541,17 +11566,17 @@ export function __wbg_warn_b62de6508e8608cc(arg0, arg1) {
     arg0.warn(arg1);
 }
 export function __wbindgen_cast_0000000000000001(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 163, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 165, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
     const ret = makeMutClosure(arg0, arg1, wasm_bindgen_ff9af61e2d43a78a___convert__closures_____invoke___wasm_bindgen_ff9af61e2d43a78a___JsValue__core_ed718c3d60ebd546___result__Result_____wasm_bindgen_ff9af61e2d43a78a___JsError___true_);
     return ret;
 }
 export function __wbindgen_cast_0000000000000002(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("Event")], shim_idx: 557, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("Event")], shim_idx: 560, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
     const ret = makeMutClosure(arg0, arg1, wasm_bindgen_ff9af61e2d43a78a___convert__closures_____invoke___web_sys_4ec35d1b8222c725___features__gen_Event__Event______true_);
     return ret;
 }
 export function __wbindgen_cast_0000000000000003(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("IDBVersionChangeEvent")], shim_idx: 163, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+    // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("IDBVersionChangeEvent")], shim_idx: 165, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
     const ret = makeMutClosure(arg0, arg1, wasm_bindgen_ff9af61e2d43a78a___convert__closures_____invoke___wasm_bindgen_ff9af61e2d43a78a___JsValue__core_ed718c3d60ebd546___result__Result_____wasm_bindgen_ff9af61e2d43a78a___JsError___true__2);
     return ret;
 }

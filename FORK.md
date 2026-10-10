@@ -8,7 +8,7 @@ Base: upstream tag **v18.8.0**.
 
 ## What is changed, and why
 
-Two behavioural changes, both in `matrix-sdk-crypto` rather than in this repo —
+Three behavioural changes, all in `matrix-sdk-crypto` rather than in this repo —
 see the companion fork [tzarebczan/matrix-rust-sdk](https://github.com/tzarebczan/matrix-rust-sdk),
 branch `eggomi/sender-data-recalc-cache`.
 
@@ -59,6 +59,23 @@ consumes an already-published one-time key, moving neither the uploaded count
 nor the unpublished-key map.
 
 Upstream was checked first: no equivalent fix exists on `main`.
+
+### 3. Owner-listed devices get no secret and no forwarded room key
+
+A keeper is the account's own Matrix device on the owner's always-on
+computer. The owner may cross-sign it so it receives the room keys
+of new messages, but it must never get the owner's secrets (cross-signing
+keys, backup key) or historical room keys by request. Upstream serves both
+automatically to any verified own device, with no hook to refuse one.
+
+`OlmMachine::set_refused_secret_devices` (in the rust fork revision
+`Cargo.toml` pins) stores a set of our own device IDs in the crypto store. For
+a device in it, verified or not, `m.secret.request` is not served,
+`m.room_key_request` is not forwarded (even for a session it was originally
+sent), and neither secrets nor forwarded keys are accepted from it. An empty
+or absent set is upstream's behaviour. Bindings here: `setRefusedSecretDevices`
+and `refusedSecretDevices` on `OlmMachine` (`src/machine.rs`), with
+`tests/refused_secret_devices.test.js`.
 
 ## Changes in *this* repo
 

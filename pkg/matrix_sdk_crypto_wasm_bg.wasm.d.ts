@@ -388,6 +388,7 @@ export const olmmachine_receiveRoomKeyBundle: (a: number, b: number, c: number, 
 export const olmmachine_receiveSyncChanges: (a: number, b: number, c: number, d: number, e: any, f: number, g: number) => [number, number, number];
 export const olmmachine_receiveSyncChangesMsc4186: (a: number, b: number, c: number, d: number, e: any, f: number, g: number) => [number, number, number];
 export const olmmachine_receiveVerificationEvent: (a: number, b: number, c: number, d: number) => [number, number, number];
+export const olmmachine_refusedSecretDevices: (a: number) => any;
 export const olmmachine_registerDevicesUpdatedCallback: (a: number, b: any) => void;
 export const olmmachine_registerReceiveSecretCallback: (a: number, b: any) => void;
 export const olmmachine_registerRoomKeyUpdatedCallback: (a: number, b: any) => void;
@@ -399,6 +400,7 @@ export const olmmachine_roomKeyForwardingEnabled: (a: number) => number;
 export const olmmachine_roomKeyRequestsEnabled: (a: number) => number;
 export const olmmachine_saveBackupDecryptionKey: (a: number, b: number, c: number, d: number) => any;
 export const olmmachine_setHasDownloadedAllRoomKeys: (a: number, b: number) => any;
+export const olmmachine_setRefusedSecretDevices: (a: number, b: number, c: number) => any;
 export const olmmachine_setRoomSettings: (a: number, b: number, c: number) => any;
 export const olmmachine_set_roomKeyForwardingEnabled: (a: number, b: number) => void;
 export const olmmachine_set_roomKeyRequestsEnabled: (a: number, b: number) => void;

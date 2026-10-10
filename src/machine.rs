@@ -404,6 +404,42 @@ impl OlmMachine {
         })
     }
 
+    /// Fork: set our own devices that never get a secret or a forwarded room
+    /// key from this device, and whose secrets and forwarded keys this device
+    /// never takes, verified or not (a keeper's device). Replaces the whole
+    /// set; kept in the store across restarts.
+    ///
+    /// * `device_ids` - the device IDs, as strings
+    #[wasm_bindgen(js_name = "setRefusedSecretDevices", unchecked_return_type = "Promise<void>")]
+    pub fn set_refused_secret_devices(&self, device_ids: Vec<String>) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let devices = device_ids
+            .into_iter()
+            .map(matrix_sdk_common::ruma::OwnedDeviceId::from)
+            .collect::<std::collections::BTreeSet<_>>();
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            me.set_refused_secret_devices(devices).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
+    /// Fork: our own devices refused secrets (see
+    /// `setRefusedSecretDevices`).
+    #[wasm_bindgen(js_name = "refusedSecretDevices", unchecked_return_type = "Promise<string[]>")]
+    pub fn refused_secret_devices(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            let devices = me.refused_secret_devices().await?;
+            let array = js_sys::Array::new();
+            for device in devices {
+                array.push(&JsValue::from_str(device.as_str()));
+            }
+            Ok(JsValue::from(array))
+        })
+    }
+
     /// Mark all tracked users as dirty.
     ///
     /// All users *whose device lists we are tracking* are flagged as needing a
