@@ -319,6 +319,16 @@ impl OlmMachine {
         future_to_promise(async move { Ok(me.display_name().await?) })
     }
 
+    /// Mark which of this user's own devices are keepers. A keeper is
+    /// never served a secret (`m.secret.request`, secret push) or a forwarded
+    /// room key, even when verified. Replaces the previous set; pass the
+    /// owner-signed keeper device list, never a guess from a display name.
+    #[wasm_bindgen(js_name = "setKeeperDevices")]
+    pub fn set_keeper_devices(&self, device_ids: Vec<String>) {
+        let ids: Vec<OwnedDeviceId> = device_ids.into_iter().map(OwnedDeviceId::from).collect();
+        self.inner.set_keeper_devices(ids)
+    }
+
     /// Whether automatic transmission of room key requests is enabled.
     ///
     /// Room key requests allow the device to request room keys that it might

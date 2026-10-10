@@ -114,7 +114,7 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test
 # All four crates are patched together — they are one workspace at one rev, and
 # patching a subset duplicates types.
 [patch."https://github.com/matrix-org/matrix-rust-sdk"]
-matrix-sdk-crypto = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "1cd973eaff2ae131f47ae846abff4704bd389c6c" }
-matrix-sdk-common = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "1cd973eaff2ae131f47ae846abff4704bd389c6c" }
-matrix-sdk-indexeddb = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "1cd973eaff2ae131f47ae846abff4704bd389c6c" }
-matrix-sdk-qrcode = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "1cd973eaff2ae131f47ae846abff4704bd389c6c" }
+matrix-sdk-crypto = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "ae0c10f845e71c529923f5588757979991a1bd63" }
+matrix-sdk-common = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "ae0c10f845e71c529923f5588757979991a1bd63" }
+matrix-sdk-indexeddb = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "ae0c10f845e71c529923f5588757979991a1bd63" }
+matrix-sdk-qrcode = { git = "https://github.com/tzarebczan/matrix-rust-sdk", rev = "ae0c10f845e71c529923f5588757979991a1bd63" }

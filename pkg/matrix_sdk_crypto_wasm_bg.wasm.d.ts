@@ -399,6 +399,7 @@ export const olmmachine_roomKeyForwardingEnabled: (a: number) => number;
 export const olmmachine_roomKeyRequestsEnabled: (a: number) => number;
 export const olmmachine_saveBackupDecryptionKey: (a: number, b: number, c: number, d: number) => any;
 export const olmmachine_setHasDownloadedAllRoomKeys: (a: number, b: number) => any;
+export const olmmachine_setKeeperDevices: (a: number, b: number, c: number) => void;
 export const olmmachine_setRoomSettings: (a: number, b: number, c: number) => any;
 export const olmmachine_set_roomKeyForwardingEnabled: (a: number, b: number) => void;
 export const olmmachine_set_roomKeyRequestsEnabled: (a: number, b: number) => void;

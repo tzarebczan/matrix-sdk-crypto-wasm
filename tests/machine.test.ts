@@ -395,6 +395,12 @@ eXmIj7ZEOIsufPdiYuKDp/aUdgUHmuCGyegfoCJze36SdFX5q6z8Aq5nKPtz+FM=
         expect(m.roomKeyForwardingEnabled).toBe(false);
     });
 
+    test("can mark keeper devices (the gossip refusal itself is tested in the Rust fork)", async () => {
+        const m = await machine();
+        m.setKeeperDevices(["KEEPERDEV01"]);
+        m.setKeeperDevices([]);
+    });
+
     test("can read tracked users", async () => {
         const m = await machine();
         const trackedUsers = await m.trackedUsers();

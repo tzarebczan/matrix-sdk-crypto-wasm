@@ -2781,6 +2781,13 @@ export class OlmMachine {
      */
     setHasDownloadedAllRoomKeys(room_id: RoomId): Promise<void>;
     /**
+     * Mark which of this user's own devices are keepers. A keeper is
+     * never served a secret (`m.secret.request`, secret push) or a forwarded
+     * room key, even when verified. Replaces the previous set; pass the
+     * owner-signed keeper device list, never a guess from a display name.
+     */
+    setKeeperDevices(device_ids: string[]): void;
+    /**
      * Store encryption settings for the given room.
      *
      * This method checks if the new settings are "safe" -- ie, that they do

@@ -8,9 +8,9 @@ Base: upstream tag **v18.8.0**.
 
 ## What is changed, and why
 
-Two behavioural changes, both in `matrix-sdk-crypto` rather than in this repo —
+Three behavioural changes, all in `matrix-sdk-crypto` rather than in this repo —
 see the companion fork [tzarebczan/matrix-rust-sdk](https://github.com/tzarebczan/matrix-rust-sdk),
-branch `eggomi/sender-data-recalc-cache`.
+branch `keeper-device-gating` (carries the first two, then the third).
 
 ### 1. Sender data is not recalculated per decrypted event
 
@@ -60,7 +60,21 @@ nor the unpublished-key map.
 
 Upstream was checked first: no equivalent fix exists on `main`.
 
+### 3. A keeper device is never served secrets or forwarded room keys
+
+An always-on keeper device on the owner's account must not receive the owner's
+secrets (cross-signing keys, the backup key) or forwarded room keys from the
+owner's other clients, even once it is cross-signed and "verified". The gossip
+machine now refuses `m.secret.request`, secret push and room key forwarding to
+own-user devices the application marks with `OlmMachine.setKeeperDevices(ids)`.
+The list is the owner-signed keeper device list, supplied by the app; the fork
+never infers a keeper from a display name. Replaces the previous set; an empty
+list restores stock behaviour. Tests: `test_secret_request_refused_for_keeper_device`
+and `test_should_not_share_key_with_keeper_device` in the Rust fork.
+
 ## Changes in *this* repo
+
+- `src/machine.rs`: the `setKeeperDevices(deviceIds: string[])` binding.
 
 - `Cargo.toml`: `[patch]` all four `matrix-rust-sdk` crates to the fork above,
   pinned by revision (not branch, so the build is reproducible).
